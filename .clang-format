@@ -1,0 +1,6 @@
+IndentWidth: 4
+BraceBreakingStyle: Attach
+AllowShortLoopsOnASingleLine: true
+ColumnLimit: 144
+PointerAlignment: Left
+AllowShortIfStatementsOnASingleLine: Always

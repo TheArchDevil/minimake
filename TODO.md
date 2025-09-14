@@ -1,0 +1,12 @@
+- [ ] Basics: Targets / Prerequsities
+- [ ] Basics: Command support
+- [ ] Variables: Basic Support
+- [ ] Variables: Speical Variables (Automatic Variables) / Wildcards
+- [ ] Enhancement: Line Wrapping
+- [ ] Conditions
+- [ ] Functions
+- [ ] Include
+- [ ] `vpath`
+- [ ] `.phony`
+- [ ] `.delete_on_error`
+- [ ] 

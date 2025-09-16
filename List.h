@@ -6,14 +6,14 @@
 #define SCOPE_SYMNAME LIST
 
 #define __INHERIT_TYPE__LIST OBJECT
+#define __FIELDS_LIST__LIST                                                                                                                    \
+    __FIELDS_LIST__OBJECT                                                                                                                      \
+    OBJECT* Data;                                                                                                                              \
+    size_t Size;                                                                                                                               \
+    size_t Length;
 #define __VTABLE_LIST__LIST __VTABLE_LIST__OBJECT
 
-DECL {
-    INHERIT;
-    OBJECT* Data;
-    size_t Size;
-    size_t Length;
-};
+TYPEDECL;
 
 MEMBERDECL(OBJECT, At, size_t pos);
 MEMBERDECL_PROPG(size_t, Length);

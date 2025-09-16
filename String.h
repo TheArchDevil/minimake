@@ -10,14 +10,14 @@
 #define SCOPE_SYMNAME STRING
 
 #define __INHERIT_TYPE__STRING OBJECT
+#define __FIELDS_LIST__STRING                                                                                                                  \
+    __FIELDS_LIST__OBJECT                                                                                                                      \
+    size_t Length;                                                                                                                             \
+    BYREFMEMORY Memory;                                                                                                                        \
+    const wchar_t* Buffer;
 #define __VTABLE_LIST__STRING __VTABLE_LIST__OBJECT
 
-DECL {
-    INHERIT;
-    size_t Length;
-    BYREFMEMORY Memory;
-    const wchar_t* Buffer;
-};
+TYPEDECL;
 
 MEMBERDECL(wchar_t, At, size_t pos);
 MEMBERDECL_PROPG(size_t, Length);

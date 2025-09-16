@@ -17,6 +17,9 @@
 #define __BASE_TYPE_OF(x) __INHERIT_TYPE__##x
 #define BASE_TYPE_OF(x) __BASE_TYPE_OF(x)
 
+#define __OBJFIELDS_MACRO_NAME(x) __FIELDS_LIST__##x
+#define OBJFIELDS_MACRO_NAME(x) __OBJFIELDS_MACRO_NAME(x)
+
 #define __SYMID_CONST_NAME(type) __objmeta_##type##$__id
 #define SYMID_CONST_NAME(type) __SYMID_CONST_NAME(type)
 #define SYMID_CONST(type) const uint32_t SYMID_CONST_NAME(type)
@@ -27,6 +30,9 @@
 #define DECL                                                                                                                                   \
     DEFINETYPE;                                                                                                                                \
     SYMDECL(SCOPE_SYMNAME)
+
+#define TYPEDECL                                                                                                                               \
+    DECL { OBJFIELDS_MACRO_NAME(SCOPE_SYMNAME); }
 
 #define OBJTYPE(obj) (*(uint32_t*)((char*)obj - 4))
 #define TYPEID(type) SYMID_CONST_NAME(type)
@@ -41,18 +47,18 @@
 #define VTABLE_NAME(x) __VTABLE_NAME(x)
 #define VTABLESYM_NAME(x) struct VTABLE_NAME(x)
 #define VTABLESYM VTABLESYM_NAME(SCOPE_SYMNAME)
-#define VTABLECONSTNAME(x) __objvtable_##x
-#define VTABLECONSTNAME_WRAP(x) VTABLECONSTNAME(x)
+#define __VTABLECONSTNAME(x) __objvtable_##x
+#define VTABLECONSTNAME(x) __VTABLECONSTNAME(x)
 #define VTABLEDEF                                                                                                                              \
     VTABLESYM{VTABLE_LIST_OF(SCOPE_SYMNAME)};                                                                                                  \
-    const VTABLESYM VTABLECONSTNAME_WRAP(SCOPE_SYMNAME) =
+    const VTABLESYM VTABLECONSTNAME(SCOPE_SYMNAME) =
 #define VTABLEINCLUDE void* __vtable
-#define VTABLE(type, x, fn) (((VTABLESYM(type)*)x)->fn)
+#define VTABLE(type, x, fn) (((VTABLESYM*)x)->fn)
 
 #define VTABLE_FUNC(obj, type, name, ...) type (*name)(PSYM(obj), ##__VA_ARGS__) // Define a function
 #define VTDEF_DTOR .$dtor = DTOR_NAME(SCOPE_SYMNAME)
 
-#define VFUNC(type, name, ...) VTABLE_FUNC(obj, type, name, ##__VA_ARGS__)
+#define VFUNC(type, name, ...) VTABLE_FUNC(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
 #define VFUNC_DTOR VFUNC(void, $dtor)
 
 // #define PROPG(obj, type, name) type (*PROPG_NAME(name))(PSYM(obj))       // Define a get-only property
@@ -68,6 +74,10 @@
 #define OBJMEMBER_PROPS_NAME(obj, name) __OBJMEMBER_PROPS_NAME(obj, name)
 #define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
 #define OBJMEMBER_NAME(obj, name) __OBJMEMBER_NAME(obj, name)
+#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
+#define OBJMEMBER_NAME(obj, name) __OBJMEMBER_NAME(obj, name)
+#define __OBJMEMBER_VIRTUAL_NAME(obj, name) __objfunc_##obj##$__memfn_virtual_##name
+#define OBJMEMBER_VIRTUAL_NAME(obj, name) __OBJMEMBER_VIRTUAL_NAME(obj, name)
 #define __OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static_##name
 #define OBJMEMBER_STATIC_NAME(obj, name) __OBJMEMBER_STATIC_NAME(obj, name)
 
@@ -89,13 +99,14 @@
 #define OBJMEMBERDEF_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(obj __this, type value)
 #define OBJMEMBERDEF(obj, type, name, ...) type OBJMEMBER_NAME(obj, name)(obj __this, ##__VA_ARGS__)
 #define OBJMEMBERDEF_STATIC(obj, type, name, ...) type OBJMEMBER_STATIC_NAME(obj, name)(__VA_ARGS__)
+#define OBJMEMBERDEF_VIRTUAL(obj, type, name, ...) type OBJMEMBER_VIRTUAL_NAME(obj, name)(obj __this, ##__VA_ARGS__)
 
 #define MEMBER_PROPG(type, name) OBJMEMBERDEF_PROPG(SCOPE_SYMNAME, type, name)
 #define MEMBER_PROPS(type, name) OBJMEMBERDEF_PROPS(SCOPE_SYMNAME, type, name)
 #define MEMBER(type, name, ...) OBJMEMBERDEF(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
 #define MEMBER_STATIC(type, name, ...) OBJMEMBERDEF_STATIC(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
-#define MEMBER_VIRTUAL(type, name, ...)                                                                                                        \
-    OBJMEMBERDEF(SCOPE_SYMNAME, type, name, ##__VA_ARGS__) { return VTABLE(SCOPE_SYMNAME, type, name)(__this, ##__VA_ARGS__); }
+#define MEMBER_VIRTUAL(type, name, ...) OBJMEMBERDEF_VIRTUAL(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
+#define WRAP_VIRTUAL_CALL(type, name, ...) return VTABLE(SCOPE_SYMNAME, this, name)(__this, ##__VA_ARGS__)
 
 #define META_ID SYMID_CONST(SCOPE_SYMNAME)
 
@@ -159,10 +170,10 @@
 #define OBJFREE(x, type) __platform_DeallocateMemory(x, SYMID_CONST_NAME(type))
 #define CREATEINSTANCE                                                                                                                         \
     void* __this = OBJALLOC(SCOPE_SYMNAME);                                                                                                    \
-    this->__vtable = &VTABLECONSTNAME_WRAP(SCOPE_SYMNAME);
+    this->__vtable = &VTABLECONSTNAME(SCOPE_SYMNAME);
 #define CREATEINSTANCE_NAMED(name)                                                                                                             \
     void* name = OBJALLOC(SCOPE_SYMNAME);                                                                                                      \
-    T(name)->__vtable = &VTABLECONSTNAME_WRAP(SCOPE_SYMNAME);
+    T(name)->__vtable = &VTABLECONSTNAME(SCOPE_SYMNAME);
 #define DESTROYINSTANCE OBJFREE(__this, SCOPE_SYMNAME)
 
 #define $get(obj, prop) ((*((obj)->PROPG_NAME(prop)))((obj)))                          // Getter call

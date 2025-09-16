@@ -8,9 +8,12 @@
 
 #define SCOPE_SYMNAME OBJECT
 
+#define __FIELDS_LIST__OBJECT void* __vtable;
 #define __VTABLE_LIST__OBJECT VTABLE_FUNC(OBJECT, void, $dtor);
 
-DECL { VTABLEINCLUDE; };
+TYPEDECL;
+
+typedef unsigned char byte;
 
 #undef SCOPE_SYMNAME
 

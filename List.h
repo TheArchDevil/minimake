@@ -8,13 +8,11 @@
 #define __INHERIT_TYPE__LIST OBJECT
 
 DECL {
-    INHERIT(OBJECT);
+    INHERIT;
     OBJECT* Data;
     size_t Size;
     size_t Length;
 };
-
-DEFINETYPE;
 
 MEMBERDECL(OBJECT, At, size_t pos);
 MEMBERDECL_PROPG(size_t, Length);

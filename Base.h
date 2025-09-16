@@ -10,8 +10,6 @@
 
 DECL { VTABLEINCLUDE; };
 
-DEFINETYPE;
-
 #undef SCOPE_SYMNAME
 
 #endif

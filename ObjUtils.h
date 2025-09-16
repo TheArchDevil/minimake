@@ -14,6 +14,9 @@
 #define PSYM(x) SYM(x)*
 #define SIZE(x) sizeof(SYM(x))
 
+#define __BASE_TYPE_OF(x) __INHERIT_TYPE__##x
+#define BASE_TYPE_OF(x) __BASE_TYPE_OF(x)
+
 #define __SYMID_CONST_NAME(type) __objmeta_##type##$__id
 #define SYMID_CONST_NAME(type) __SYMID_CONST_NAME(type)
 #define SYMID_CONST(type) const uint32_t SYMID_CONST_NAME(type)
@@ -21,15 +24,17 @@
     extern SYMID_CONST(type);                                                                                                                  \
     typedef SYM(type)
 
-#define DECL SYMDECL(SCOPE_SYMNAME)
+#define DECL                                                                                                                                   \
+    DEFINETYPE;                                                                                                                                \
+    SYMDECL(SCOPE_SYMNAME)
 
 #define OBJTYPE(obj) (*(uint32_t*)((char*)obj - 4))
 #define TYPEID(type) SYMID_CONST_NAME(type)
 
-#define INHERIT(type)                                                                                                                          \
+#define INHERIT                                                                                                                                \
     union {                                                                                                                                    \
         VTABLEINCLUDE;                                                                                                                         \
-        SYM(type) Base;                                                                                                                        \
+        BASE_TYPE_OF(SCOPE_SYMNAME) Base;                                                                                                      \
     }
 
 #define VTABLE_NAME(x) __objvtable_##x
@@ -63,12 +68,12 @@
 #define __OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static_##name
 #define OBJMEMBER_STATIC_NAME(obj, name) __OBJMEMBER_STATIC_NAME(obj, name)
 
-#define OBJMEMBERDECL_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(PSYM(obj))
-#define OBJMEMBERDECL_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(PSYM(obj), type value)
+#define OBJMEMBERDECL_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(obj)
+#define OBJMEMBERDECL_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(obj, type value)
 #define OBJMEMBERDECL_PROPGS(obj, type, name)                                                                                                  \
     OBJMEMBERDECL_PROPG(obj, type name);                                                                                                       \
     OBJMEMBERDECL_PROPS(obj, type name)
-#define OBJMEMBERDECL(obj, type, name, ...) type OBJMEMBER_NAME(obj, name)(PSYM(obj), ##__VA_ARGS__)
+#define OBJMEMBERDECL(obj, type, name, ...) type OBJMEMBER_NAME(obj, name)(obj, ##__VA_ARGS__)
 #define OBJMEMBERDECL_STATIC(obj, type, name, ...) type OBJMEMBER_STATIC_NAME(obj, name)(__VA_ARGS__)
 
 #define MEMBERDECL_PROPG(type, name) OBJMEMBERDECL_PROPG(SCOPE_SYMNAME, type, name)
@@ -77,9 +82,9 @@
 #define MEMBERDECL(type, name, ...) OBJMEMBERDECL(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
 #define MEMBERDECL_STATIC(type, name, ...) OBJMEMBERDECL_STATIC(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
 
-#define OBJMEMBERDEF_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(PSYM(obj) __this)
-#define OBJMEMBERDEF_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(PSYM(obj) __this, type value)
-#define OBJMEMBERDEF(obj, type, name, ...) type OBJMEMBER_NAME(obj, name)(PSYM(obj) __this, ##__VA_ARGS__)
+#define OBJMEMBERDEF_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(obj __this)
+#define OBJMEMBERDEF_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(obj __this, type value)
+#define OBJMEMBERDEF(obj, type, name, ...) type OBJMEMBER_NAME(obj, name)(obj __this, ##__VA_ARGS__)
 #define OBJMEMBERDEF_STATIC(obj, type, name, ...) type OBJMEMBER_STATIC_NAME(obj, name)(__VA_ARGS__)
 
 #define MEMBER_PROPG(type, name) OBJMEMBERDEF_PROPG(SCOPE_SYMNAME, type, name)
@@ -92,6 +97,8 @@
 #define META_ID SYMID_CONST(SCOPE_SYMNAME)
 
 #define this ((PSYM(SCOPE_SYMNAME))(__this))
+
+#define T(x) ((PSYM(SCOPE_SYMNAME))(__this))
 
 // #define VFNIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name          // Name of implementation for a virtual method
 // #define VPGIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name##$getter // Name of implementation for a virtual property getter
@@ -149,11 +156,11 @@
     this->__vtable = &VTABLECONSTNAME_WRAP(SCOPE_SYMNAME);
 #define DESTROYINSTANCE OBJFREE(__this, SCOPE_SYMNAME)
 
-#define $get(obj, prop) ((*((obj)->PROPG_NAME(prop)))((obj)))               // Getter call
-#define $set(obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value)) // Setter call
-#define $(obj, member, ...) ((*((obj)->member))((obj), ##__VA_ARGS__))      // Member call
+#define $get(obj, prop) ((*((obj)->PROPG_NAME(prop)))((obj)))                          // Getter call
+#define $set(obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value))            // Setter call
+#define $(type, obj, member, ...) (OBJMEMBER_NAME(type, member)((obj), ##__VA_ARGS__)) // Member call
 
-#define $$(obj, member, ...) OBJMEMBER_NAME(SCOPE_SYMNAME, member)((obj), ##__VA_ARGS__) // Member call (internal)
+#define $$(obj, member, ...) $(SCOPE_SYMNAME, obj, member, ##__VA_ARGS__) // Member call (internal)
 
 #define META_TYPEID_UNDEFINED 0
 

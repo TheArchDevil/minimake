@@ -8,6 +8,8 @@
 
 #define SCOPE_SYMNAME OBJECT
 
+#define __VTABLE_LIST__OBJECT VTABLE_FUNC(OBJECT, void, $dtor);
+
 DECL { VTABLEINCLUDE; };
 
 #undef SCOPE_SYMNAME

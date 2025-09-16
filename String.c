@@ -14,7 +14,6 @@ DTOR {
     DESTROYINSTANCE;
 }
 
-VTABLESYM { VTABLE_FUNC(STRING, void, $dtor); };
 VTABLEDEF{VTDEF_DTOR};
 
 MEMBER(wchar_t, At, size_t pos) { return BUF(this)[pos]; }

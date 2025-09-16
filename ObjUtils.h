@@ -37,12 +37,15 @@
         BASE_TYPE_OF(SCOPE_SYMNAME) Base;                                                                                                      \
     }
 
-#define VTABLE_NAME(x) __objvtable_##x
+#define __VTABLE_NAME(x) __objtype_##x##$__vtable
+#define VTABLE_NAME(x) __VTABLE_NAME(x)
 #define VTABLESYM_NAME(x) struct VTABLE_NAME(x)
 #define VTABLESYM VTABLESYM_NAME(SCOPE_SYMNAME)
-#define VTABLECONSTNAME(x) __objvtabledef_##x
+#define VTABLECONSTNAME(x) __objvtable_##x
 #define VTABLECONSTNAME_WRAP(x) VTABLECONSTNAME(x)
-#define VTABLEDEF static const VTABLESYM VTABLECONSTNAME_WRAP(SCOPE_SYMNAME) =
+#define VTABLEDEF                                                                                                                              \
+    VTABLESYM{VTABLE_LIST_OF(SCOPE_SYMNAME)};                                                                                                  \
+    const VTABLESYM VTABLECONSTNAME_WRAP(SCOPE_SYMNAME) =
 #define VTABLEINCLUDE void* __vtable
 #define VTABLE(type, x, fn) (((VTABLESYM(type)*)x)->fn)
 
@@ -99,6 +102,9 @@
 #define this ((PSYM(SCOPE_SYMNAME))(__this))
 
 #define T(x) ((PSYM(SCOPE_SYMNAME))(x))
+
+#define __VTABLE_LIST_OF(x) __VTABLE_LIST__##x
+#define VTABLE_LIST_OF(x) __VTABLE_LIST_OF(x)
 
 // #define VFNIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name          // Name of implementation for a virtual method
 // #define VPGIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name##$getter // Name of implementation for a virtual property getter

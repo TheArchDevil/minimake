@@ -98,7 +98,7 @@
 
 #define this ((PSYM(SCOPE_SYMNAME))(__this))
 
-#define T(x) ((PSYM(SCOPE_SYMNAME))(__this))
+#define T(x) ((PSYM(SCOPE_SYMNAME))(x))
 
 // #define VFNIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name          // Name of implementation for a virtual method
 // #define VPGIMPL_NAME(obj, name) __objfunc_##obj##$impl_virtual_##name##$getter // Name of implementation for a virtual property getter
@@ -154,13 +154,17 @@
 #define CREATEINSTANCE                                                                                                                         \
     void* __this = OBJALLOC(SCOPE_SYMNAME);                                                                                                    \
     this->__vtable = &VTABLECONSTNAME_WRAP(SCOPE_SYMNAME);
+#define CREATEINSTANCE_NAMED(name)                                                                                                             \
+    void* name = OBJALLOC(SCOPE_SYMNAME);                                                                                                      \
+    T(name)->__vtable = &VTABLECONSTNAME_WRAP(SCOPE_SYMNAME);
 #define DESTROYINSTANCE OBJFREE(__this, SCOPE_SYMNAME)
 
 #define $get(obj, prop) ((*((obj)->PROPG_NAME(prop)))((obj)))                          // Getter call
 #define $set(obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value))            // Setter call
 #define $(type, obj, member, ...) (OBJMEMBER_NAME(type, member)((obj), ##__VA_ARGS__)) // Member call
+#define $$(type, func, ...) (OBJMEMBER_STATIC_NAME(type, func)(__VA_ARGS__))
 
-#define $$(obj, member, ...) $(SCOPE_SYMNAME, obj, member, ##__VA_ARGS__) // Member call (internal)
+#define _$(obj, member, ...) $(SCOPE_SYMNAME, obj, member, ##__VA_ARGS__) // Member call (internal)
 
 #define META_TYPEID_UNDEFINED 0
 

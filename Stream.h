@@ -1,0 +1,34 @@
+#pragma once
+
+#ifndef __STREAM_H__HEADERGUARD__
+#define __STREAM_H__HEADERGUARD__
+
+#include "Base.h"
+
+#define SCOPE_SYMNAME STREAM
+
+#define __INHERIT_TYPE__STREAM OBJECT
+#define __FIELDS_LIST__STREAM __FIELDS_LIST__OBJECT
+#define __VTABLE_LIST__STREAM                                                                                                                  \
+    __VTABLE_LIST__OBJECT                                                                                                                      \
+    VTABLE_FUNC(STREAM, bool, IsReadable);                                                                                                     \
+    VTABLE_FUNC(STREAM, bool, IsWritable);                                                                                                     \
+    VTABLE_FUNC(STREAM, bool, IsSeekable);                                                                                                     \
+    VTABLE_FUNC(STREAM, byte, Read);                                                                                                           \
+    VTABLE_FUNC(STREAM, void, Write, byte data);                                                                                               \
+    VTABLE_FUNC(STREAM, void, Seek, size_t offset);                                                                                            \
+    VTABLE_FUNC(STREAM, bool, IsEndOfStream);
+
+TYPEDECL;
+
+MEMBERDECL(bool, IsReadable);
+MEMBERDECL(bool, IsWritable);
+MEMBERDECL(bool, IsSeekable);
+MEMBERDECL(byte, Read);
+MEMBERDECL(void, Write, byte data);
+MEMBERDECL(void, Seek, size_t offset);
+MEMBERDECL(bool, IsEndOfStream);
+
+#undef SCOPE_SYMNAME
+
+#endif

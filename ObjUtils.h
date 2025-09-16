@@ -9,17 +9,17 @@
 #define PROPG_NAME(prop) prop##$getter
 #define PROPS_NAME(prop) prop##$setter
 
-#define SYM(x) struct __objtype_##x // Object symbol definition
-#define TSYM(x) typedef SYM(x)
+#define __SYM(x) struct __objtype_##x
+#define SYM(x) __SYM(x) // Object symbol definition
 #define PSYM(x) SYM(x)*
 #define SIZE(x) sizeof(SYM(x))
 
-#define SYMID_CONST_NAME(type) __objmeta_##type##$__id
+#define __SYMID_CONST_NAME(type) __objmeta_##type##$__id
+#define SYMID_CONST_NAME(type) __SYMID_CONST_NAME(type)
 #define SYMID_CONST(type) const uint32_t SYMID_CONST_NAME(type)
 #define SYMDECL(type)                                                                                                                          \
     extern SYMID_CONST(type);                                                                                                                  \
-    TSYM(type)
-#define SYMID(type, id) const uint32_t SYMID_CONST_NAME(type) = id
+    typedef SYM(type)
 
 #define DECL SYMDECL(SCOPE_SYMNAME)
 
@@ -54,15 +54,14 @@
  PROPS(obj, type, name) // Define a get-set property
 #define DEFINETYPE typedef void* SCOPE_SYMNAME
 
-#define OBJMEMBER_PROPG_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__getter
-#define OBJMEMBER_PROPS_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__getter
-#define OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
-#define OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static_##name
-
-#define OBJMEMBER_PROPG_NAME_WRAP(obj, name) OBJMEMBER_PROPG_NAME(obj, name)
-#define OBJMEMBER_PROPS_NAME_WRAP(obj, name) OBJMEMBER_PROPS_NAME(obj, name)
-#define OBJMEMBER_NAME_WRAP(obj, name) OBJMEMBER_NAME(obj, name)
-#define OBJMEMBER_STATIC_NAME_WRAP(obj, name) OBJMEMBER_STATIC_NAME(obj, name)
+#define __OBJMEMBER_PROPG_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__getter
+#define OBJMEMBER_PROPG_NAME(obj, name) __OBJMEMBER_PROPG_NAME(obj, name)
+#define __OBJMEMBER_PROPS_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__setter
+#define OBJMEMBER_PROPS_NAME(obj, name) __OBJMEMBER_PROPS_NAME(obj, name)
+#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
+#define OBJMEMBER_NAME(obj, name) __OBJMEMBER_NAME(obj, name)
+#define __OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static_##name
+#define OBJMEMBER_STATIC_NAME(obj, name) __OBJMEMBER_STATIC_NAME(obj, name)
 
 #define OBJMEMBERDECL_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(PSYM(obj))
 #define OBJMEMBERDECL_PROPS(obj, type, name) void OBJMEMBER_PROPS_NAME(obj, name)(PSYM(obj), type value)
@@ -112,14 +111,12 @@
 // #define IVPSIMPL(obj, type, name) \
 //     static void IVPSIMPL_NAME(obj, name)(PISYM(obj) this, type value) // Implementation for internal virtual property setter
 
-#define OBJCTOR_NAME(x) __objfunc_##x##$__ctor                               // Name of object constructor
-#define OBJCTOREX_NAME(x, tag) __objfunc_##x##$ctor_##tag                    // Name of object constructor (extended)
-#define OBJDTOR_NAME(x) __objfunc_##x##$__dtor                               // Name of object destructor
-#define OBJDTOREX_NAME(x, tag) __objfunc_##x##$dtor##tag                     // Name of object destructor (extended)
-#define OBJCTOR(x, ...) PSYM(x) OBJCTOR_NAME(x)(__VA_ARGS__)                 // Object constructor
-#define OBJCTOREX(x, tag, ...) PSYM(x) OBJCTOREX_NAME(x, tag)(__VA_ARGS__)   // Object constructor (extended)
-#define OBJDTOR(x) static void OBJDTOR_NAME(x)(PSYM(x) __this)               // Object destructor
-#define OBJDTOREX(x, tag) static void OBJDTOREX_NAME(x, tag)(PSYM(x) __this) // Object destructor (extended)
+#define __OBJCTOR_NAME(x) __objfunc_##x##$__ctor               // Name of object constructor
+#define OBJCTOR_NAME(x) __OBJCTOR_NAME(x)                      // Name of object constructor
+#define __OBJDTOR_NAME(x) __objfunc_##x##$__dtor               // Name of object destructor
+#define OBJDTOR_NAME(x) __OBJDTOR_NAME(x)                      // Name of object destructor
+#define OBJCTOR(x, ...) PSYM(x) OBJCTOR_NAME(x)(__VA_ARGS__)   // Object constructor
+#define OBJDTOR(x) static void OBJDTOR_NAME(x)(PSYM(x) __this) // Object destructor
 
 #define DTOR OBJDTOR(SCOPE_SYMNAME)
 #define DTOR_NAME(x) OBJDTOR_NAME(x)
@@ -143,7 +140,7 @@
 
 #define NEW(type, ...) OBJCTOR_NAME(type)(__VA_ARGS__)               // Create object
 #define NEWEX(type, tag, ...) OBJCTOREX_NAME(type, tag)(__VA_ARGS__) // Create object (extended)
-#define DEL(obj) $(OBJECT, $dtor)                                    // Delete object
+#define DEL(obj) $(OBJECT, obj, $dtor)                               // Delete object
 
 #define OBJALLOC(x) __platform_AllocateMemory(sizeof(SYM(x)), SYMID_CONST_NAME(x))
 #define OBJFREE(x, type) __platform_DeallocateMemory(x, SYMID_CONST_NAME(type))
@@ -156,6 +153,10 @@
 #define $set(obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value)) // Setter call
 #define $(obj, member, ...) ((*((obj)->member))((obj), ##__VA_ARGS__))      // Member call
 
-#define $$(obj, member, ...) OBJMEMBER_NAME_WRAP(SCOPE_SYMNAME, member)((obj), ##__VA_ARGS__) // Member call (internal)
+#define $$(obj, member, ...) OBJMEMBER_NAME(SCOPE_SYMNAME, member)((obj), ##__VA_ARGS__) // Member call (internal)
+
+#define META_TYPEID_UNDEFINED 0
+
+#define THIS_ARG SCOPE_SYMNAME __this
 
 #endif

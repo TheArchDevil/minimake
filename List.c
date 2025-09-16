@@ -6,7 +6,12 @@
 
 META_ID = 12;
 
-DTOR { DESTROYINSTANCE; }
+DTOR {
+    if (this->Data != NULL) {
+        __platform_DeallocateMemory(this->Data, META_TYPEID_UNDEFINED);
+    }
+    DESTROYINSTANCE;
+}
 
 VTABLESYM { VFUNC_DTOR; };
 VTABLEDEF{VTDEF_DTOR};
@@ -18,19 +23,19 @@ CTOR {
     this->Length = 0;
 }
 
-static void __ExpandList(LIST __this) {
+static void __ExpandList(THIS_ARG) {
     if (this->Data == NULL) {
         this->Size = LIST_MINIMUM_BLOCK_SIZE;
-        this->Data = __platform_AllocateMemory(sizeof(OBJECT) * LIST_MINIMUM_BLOCK_SIZE, 0);
+        this->Data = __platform_AllocateMemory(sizeof(OBJECT) * LIST_MINIMUM_BLOCK_SIZE, META_TYPEID_UNDEFINED);
     } else {
         OBJECT* xbuf = this->Data;
-        OBJECT* nbuf = __platform_AllocateMemory(this->Size << 1, 0);
+        OBJECT* nbuf = __platform_AllocateMemory(sizeof(OBJECT) * (this->Size << 1), META_TYPEID_UNDEFINED);
         for (size_t i = 0; i < this->Size; i++) {
             nbuf[i] = xbuf[i];
         }
         this->Size <<= 1;
         this->Data = nbuf;
-        __platform_DeallocateMemory(xbuf, 0);
+        __platform_DeallocateMemory(xbuf, META_TYPEID_UNDEFINED);
     }
 }
 
@@ -49,7 +54,7 @@ MEMBER(void, Insert, OBJECT object, size_t pos) {
     if (this->Length == this->Size) {
         __ExpandList(this);
     }
-    for (int i = this->Length; i > pos; i--) {
+    for (size_t i = this->Length; i > pos; i--) {
         this->Data[i] = this->Data[i - 1];
     }
     this->Data[pos] = object;

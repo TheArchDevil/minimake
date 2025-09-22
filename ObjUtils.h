@@ -3,7 +3,7 @@
 #ifndef __OBJUTILS_H__
 #define __OBJUTILS_H__
 
-#include <Platform.h>
+#include "Platform.h"
 #include <stdint.h>
 
 #define PROPG_NAME(prop) prop##$getter
@@ -32,7 +32,8 @@
     SYMDECL(SCOPE_SYMNAME)
 
 #define TYPEDECL                                                                                                                               \
-    DECL { OBJFIELDS_MACRO_NAME(SCOPE_SYMNAME); }
+    DEFINETYPE;                                                                                                                                \
+    SYMDECL(SCOPE_SYMNAME) { OBJFIELDS_MACRO_NAME(SCOPE_SYMNAME); }
 
 #define OBJTYPE(obj) (*(uint32_t*)((char*)obj - 4))
 #define TYPEID(type) SYMID_CONST_NAME(type)
@@ -55,8 +56,10 @@
 #define VTABLEINCLUDE void* __vtable
 #define VTABLE(type, x, fn) (((VTABLESYM*)x)->fn)
 
-#define VTABLE_FUNC(obj, type, name, ...) type (*name)(PSYM(obj), ##__VA_ARGS__) // Define a function
+#define VTABLE_FUNC(obj, type, name, ...) type (*name)(obj, ##__VA_ARGS__) // Define a function
 #define VTDEF_DTOR .$dtor = DTOR_NAME(SCOPE_SYMNAME)
+
+#define VTDEF_FUNC(x) .x = OBJMEMBER_VIRTUAL_NAME(SCOPE_SYMNAME, x)
 
 #define VFUNC(type, name, ...) VTABLE_FUNC(SCOPE_SYMNAME, type, name, ##__VA_ARGS__)
 #define VFUNC_DTOR VFUNC(void, $dtor)
@@ -135,12 +138,12 @@
 // #define IVPSIMPL(obj, type, name) \
 //     static void IVPSIMPL_NAME(obj, name)(PISYM(obj) this, type value) // Implementation for internal virtual property setter
 
-#define __OBJCTOR_NAME(x) __objfunc_##x##$__ctor               // Name of object constructor
-#define OBJCTOR_NAME(x) __OBJCTOR_NAME(x)                      // Name of object constructor
-#define __OBJDTOR_NAME(x) __objfunc_##x##$__dtor               // Name of object destructor
-#define OBJDTOR_NAME(x) __OBJDTOR_NAME(x)                      // Name of object destructor
-#define OBJCTOR(x, ...) PSYM(x) OBJCTOR_NAME(x)(__VA_ARGS__)   // Object constructor
-#define OBJDTOR(x) static void OBJDTOR_NAME(x)(PSYM(x) __this) // Object destructor
+#define __OBJCTOR_NAME(x) __objfunc_##x##$__ctor             // Name of object constructor
+#define OBJCTOR_NAME(x) __OBJCTOR_NAME(x)                    // Name of object constructor
+#define __OBJDTOR_NAME(x) __objfunc_##x##$__dtor             // Name of object destructor
+#define OBJDTOR_NAME(x) __OBJDTOR_NAME(x)                    // Name of object destructor
+#define OBJCTOR(x, ...) PSYM(x) OBJCTOR_NAME(x)(__VA_ARGS__) // Object constructor
+#define OBJDTOR(x) static void OBJDTOR_NAME(x)(x __this)     // Object destructor
 
 #define DTOR OBJDTOR(SCOPE_SYMNAME)
 #define DTOR_NAME(x) OBJDTOR_NAME(x)
@@ -164,7 +167,7 @@
 
 #define NEW(type, ...) OBJCTOR_NAME(type)(__VA_ARGS__)               // Create object
 #define NEWEX(type, tag, ...) OBJCTOREX_NAME(type, tag)(__VA_ARGS__) // Create object (extended)
-#define DEL(obj) $(OBJECT, obj, $dtor)                               // Delete object
+#define DEL(obj) $(OBJECT, obj, $__special_dtor)                     // Delete object
 
 #define OBJALLOC(x) __platform_AllocateMemory(sizeof(SYM(x)), SYMID_CONST_NAME(x))
 #define OBJFREE(x, type) __platform_DeallocateMemory(x, SYMID_CONST_NAME(type))

@@ -10,6 +10,6 @@ MEMBER(bool, IsSeekable) { WRAP_VIRTUAL_CALL(bool, IsSeekable); }
 MEMBER(bool, IsEndOfStream) { WRAP_VIRTUAL_CALL(bool, IsEndOfStream); }
 MEMBER(byte, Read) { WRAP_VIRTUAL_CALL(byte, Read); }
 MEMBER(void, Write, byte data) { WRAP_VIRTUAL_CALL(void, Write, data); }
-MEMBER(void, Seek, size_t pos) { WRAP_VIRTUAL_CALL(void, Seek, pos); }
+MEMBER(void, Seek, size_t pos, unsigned seekMode) { WRAP_VIRTUAL_CALL(void, Seek, pos, seekMode); }
 
 #undef SCOPE_SYMNAME

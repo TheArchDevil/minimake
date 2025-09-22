@@ -46,11 +46,12 @@ bool __platform_DeallocateMemory(void* obj, uint32_t typeId) {
 
 #ifdef __linux__
 // #include <sys/mman.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 bool ClearConsole() {
     putchar('\033');
-    puthcar('c');
+    putchar('c');
     return true;
 }
 

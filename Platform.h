@@ -1,12 +1,11 @@
 #pragma once
 
-#ifndef __PLATFORM_H__
-#define __PLATFORM_H__
+#ifndef __PLATFORM_H__HEADERGUARD__
+#define __PLATFORM_H__HEADERGUARD__
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-
-#include "ObjUtils.h"
 
 #ifdef WIN32
 // #include <Windows.h>
@@ -29,7 +28,7 @@ bool ClearConsole();
 //     if (!this) return NULL
 // #define OBJFREE(obj, id) __platform_DeallocateMemory(obj, id)
 
-void* __platform_AllocateMemory(size_t, uint32_t);
-bool __platform_DeallocateMemory(void*, uint32_t);
+void* __platform_AllocateMemory(size_t, unsigned);
+bool __platform_DeallocateMemory(void*, unsigned);
 
 #endif

@@ -3,7 +3,7 @@
 #ifndef __STRING_H__HEADERGUARD__
 #define __STRING_H__HEADERGUARD__
 
-#include <ByRefMemory.h>
+#include "ByRefMemory.h"
 #include <stddef.h>
 #include <wchar.h>
 

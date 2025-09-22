@@ -9,8 +9,12 @@
 
 #define __INHERIT_TYPE__FILESTREAM STREAM
 #define __FIELDS_LIST__FILESTREAM                                                                                                              \
-    __VTABLE_LIST__STREAM                                                                                                                      \
-    int fd;
+    __FIELDS_LIST__STREAM                                                                                                                      \
+    int fd;                                                                                                                                    \
+    bool IsSharedFd;                                                                                                                           \
+    byte* Buffer;                                                                                                                              \
+    byte *BufferPrimarySlice, *BufferBackupSlice;                                                                                              \
+    bool EofReached;
 #define __VTABLE_LIST__FILESTREAM __VTABLE_LIST__STREAM
 
 TYPEDECL;

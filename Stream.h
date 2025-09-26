@@ -19,7 +19,8 @@
     VTABLE_FUNC(STREAM, void, Seek, size_t offset, unsigned seekMode);                                                                         \
     VTABLE_FUNC(STREAM, size_t, ReadBuffer, byte* buffer, size_t size);                                                                        \
     VTABLE_FUNC(STREAM, size_t, WriteBuffer, byte* buffer, size_t size);                                                                       \
-    VTABLE_FUNC(STREAM, bool, IsEndOfStream);
+    VTABLE_FUNC(STREAM, bool, IsEndOfStream);                                                                                                  \
+    VTABLE_FUNC(STREAM, void, Close);
 
 TYPEDECL;
 
@@ -32,6 +33,7 @@ MEMBERDECL(size_t, ReadBuffer, byte* buffer, size_t size);
 MEMBERDECL(size_t, WriteBuffer, byte* buffer, size_t size);
 MEMBERDECL(void, Seek, size_t offset, unsigned seekMode);
 MEMBERDECL(bool, IsEndOfStream);
+MEMBERDECL(void, Close);
 
 #undef SCOPE_SYMNAME
 

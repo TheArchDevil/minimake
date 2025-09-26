@@ -3,7 +3,7 @@
 #ifndef __FILE_STREAM_H__HEADERGUARD__
 #define __FILE_STREAM_H__HEADERGUARD__
 
-#include "Stream.h"
+#include "../../Stream.h"
 
 #define SCOPE_SYMNAME FILESTREAM
 

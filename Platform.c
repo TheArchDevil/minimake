@@ -46,8 +46,12 @@ bool __platform_DeallocateMemory(void* obj, uint32_t typeId) {
 
 #ifdef __linux__
 // #include <sys/mman.h>
+#include <errno.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <wchar.h>
 
 bool ClearConsole() {
     putchar('\033');
@@ -70,5 +74,12 @@ bool __platform_DeallocateMemory(void* obj, uint32_t typeId) {
         return true;
     }
     return false;
+}
+
+size_t __platform_MultiByteToWideChar(char* cbuf, const wchar_t* wbuf, size_t wlen, size_t clen) {
+    if (!wbuf || (!cbuf && clen > 0)) return (size_t)-1;
+    mbstate_t st = {0};
+    const wchar_t* src = wbuf;
+    return wcsnrtombs(cbuf, &src, wlen, clen, &st);
 }
 #endif

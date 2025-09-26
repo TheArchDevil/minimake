@@ -1,5 +1,5 @@
 #include "FileStream.h"
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -16,10 +16,6 @@ DTOR {
     }
     DESTROYINSTANCE;
 }
-
-VTABLEDEF{VTDEF_DTOR,        VTDEF_FUNC(IsReadable), VTDEF_FUNC(IsWritable),  VTDEF_FUNC(IsSeekable), VTDEF_FUNC(Read),
-          VTDEF_FUNC(Write), VTDEF_FUNC(ReadBuffer), VTDEF_FUNC(WriteBuffer), VTDEF_FUNC(Seek)};
-
 static bool __CheckFileDescriptorPermissions(int fd, int perm) {
     int flags = fcntl(fd, F_GETFL);
     int accmode = flags & O_ACCMODE;
@@ -35,7 +31,7 @@ MEMBER_VIRTUAL(bool, IsSeekable) {
 }
 MEMBER_VIRTUAL(byte, Read) {
     byte b;
-    read(this->fd, b, 1);
+    read(this->fd, &b, 1);
     return b;
 }
 MEMBER_VIRTUAL(void, Write, byte data) { write(this->fd, &data, 1); }
@@ -53,6 +49,9 @@ MEMBER_VIRTUAL(size_t, WriteBuffer, byte* buffer, size_t count) {
     }
     return x;
 }
-MEMBER_VIRTUAL(bool, Seek, size_t pos, unsigned seekMode) { lseek(this->fd, pos, seekMode); }
+MEMBER_VIRTUAL(void, Seek, size_t pos, unsigned seekMode) { lseek(this->fd, pos, seekMode); }
+
+VTABLEDEF{VTDEF_DTOR,        VTDEF_FUNC(IsReadable), VTDEF_FUNC(IsWritable),  VTDEF_FUNC(IsSeekable), VTDEF_FUNC(Read),
+          VTDEF_FUNC(Write), VTDEF_FUNC(ReadBuffer), VTDEF_FUNC(WriteBuffer), VTDEF_FUNC(Seek)};
 
 #undef SCOPE_SYMNAME

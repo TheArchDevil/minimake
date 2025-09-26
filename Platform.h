@@ -30,5 +30,8 @@ bool ClearConsole();
 
 void* __platform_AllocateMemory(size_t, unsigned);
 bool __platform_DeallocateMemory(void*, unsigned);
+size_t __platform_MultiByteToWideChar(char* cbuf, const wchar_t* wbuf, size_t wlen, size_t clen);
+
+typedef mbstate_t __platform_MultiByteConverstionStateBuffer;
 
 #endif

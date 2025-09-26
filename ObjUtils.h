@@ -25,7 +25,7 @@
 #define SYMID_CONST(type) const uint32_t SYMID_CONST_NAME(type)
 #define SYMDECL(type)                                                                                                                          \
     extern SYMID_CONST(type);                                                                                                                  \
-    typedef SYM(type)
+    SYM(type)
 
 #define DECL                                                                                                                                   \
     DEFINETYPE;                                                                                                                                \
@@ -71,17 +71,17 @@
  PROPS(obj, type, name) // Define a get-set property
 #define DEFINETYPE typedef void* SCOPE_SYMNAME
 
-#define __OBJMEMBER_PROPG_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__getter
+#define __OBJMEMBER_PROPG_NAME(obj, name) __objfunc_##obj##$__prop_getter$__##name
 #define OBJMEMBER_PROPG_NAME(obj, name) __OBJMEMBER_PROPG_NAME(obj, name)
-#define __OBJMEMBER_PROPS_NAME(obj, name) __objfunc_##obj##$__prop_##name##$__setter
+#define __OBJMEMBER_PROPS_NAME(obj, name) __objfunc_##obj##$__prop_setter$__##name
 #define OBJMEMBER_PROPS_NAME(obj, name) __OBJMEMBER_PROPS_NAME(obj, name)
-#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
+#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn$__##name
 #define OBJMEMBER_NAME(obj, name) __OBJMEMBER_NAME(obj, name)
-#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn_##name
+#define __OBJMEMBER_NAME(obj, name) __objfunc_##obj##$__memfn$__##name
 #define OBJMEMBER_NAME(obj, name) __OBJMEMBER_NAME(obj, name)
-#define __OBJMEMBER_VIRTUAL_NAME(obj, name) __objfunc_##obj##$__memfn_virtual_##name
+#define __OBJMEMBER_VIRTUAL_NAME(obj, name) __objfunc_##obj##$__memfn_virtual$__##name
 #define OBJMEMBER_VIRTUAL_NAME(obj, name) __OBJMEMBER_VIRTUAL_NAME(obj, name)
-#define __OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static_##name
+#define __OBJMEMBER_STATIC_NAME(obj, name) __objfunc_##obj##$__memfn_static$__##name
 #define OBJMEMBER_STATIC_NAME(obj, name) __OBJMEMBER_STATIC_NAME(obj, name)
 
 #define OBJMEMBERDECL_PROPG(obj, type, name) type OBJMEMBER_PROPG_NAME(obj, name)(obj)
@@ -145,10 +145,17 @@
 #define OBJCTOR(x, ...) PSYM(x) OBJCTOR_NAME(x)(__VA_ARGS__) // Object constructor
 #define OBJDTOR(x) static void OBJDTOR_NAME(x)(x __this)     // Object destructor
 
+#define __OBJINIT_NAME(x) __objfunc_##x##$__init
+#define OBJINIT_NAME(x) __OBJINIT_NAME(x)
+#define OBJINIT(x, ...) void OBJINIT_NAME(x)(x __this, ##__VA_ARGS__)
+
 #define DTOR OBJDTOR(SCOPE_SYMNAME)
 #define DTOR_NAME(x) OBJDTOR_NAME(x)
 #define CTOR OBJCTOR(SCOPE_SYMNAME)
 #define CTOREX(tag, ...) OBJCTOREX(SCOPE_SYMNAME, tag, ##__VA_ARGS__)
+#define INIT OBJINIT(SCOPE_SYMNAME)
+
+#define BASEINIT OBJINIT_NAME(BASE_TYPE_OF(SCOPE_SYMNAME))(__this)
 
 // #define OBJ_USEVFNIMPL(sym, obj, fname) ((PSYM(sym))(obj))->fname = VFNIMPL_NAME(sym, fname)
 // #define OBJBASE_USEVFNIMPL(sym, obj, fname) (obj)->Base.fname = VFNIMPL_NAME(sym, fname)
@@ -179,8 +186,8 @@
     T(name)->__vtable = &VTABLECONSTNAME(SCOPE_SYMNAME);
 #define DESTROYINSTANCE OBJFREE(__this, SCOPE_SYMNAME)
 
-#define $get(obj, prop) ((*((obj)->PROPG_NAME(prop)))((obj)))                          // Getter call
-#define $set(obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value))            // Setter call
+#define $get(type, obj, prop) (OBJMEMBER_PROPG_NAME(type, prop)((obj)))                // Getter call
+#define $set(type, obj, prop, value) ((*((obj)->PROPS_NAME(prop)))((obj), value))      // Setter call
 #define $(type, obj, member, ...) (OBJMEMBER_NAME(type, member)((obj), ##__VA_ARGS__)) // Member call
 #define $$(type, func, ...) (OBJMEMBER_STATIC_NAME(type, func)(__VA_ARGS__))
 

@@ -1,7 +1,7 @@
 #include "Base.h"
 
-#ifndef __LIST_H__
-#define __LIST_H__
+#ifndef __LIST_H__HEADERGUARD__
+#define __LIST_H__HEADERGUARD__
 
 #define SCOPE_SYMNAME LIST
 
